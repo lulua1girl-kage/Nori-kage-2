@@ -43,6 +43,12 @@ public final class NoriVoiceService extends Service implements RecognitionListen
         String a=in.getAction();
         if(ACTION_STOP.equals(a)){stopVoice();return START_NOT_STICKY;}
         if(ACTION_SPEAK.equals(a)){
+            if(!running){
+                try{
+                    if(Build.VERSION.SDK_INT>=29)ServiceCompat.startForeground(this,NOTIFICATION_ID,buildNotification("Nori is speaking"),android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE);
+                    else startForeground(NOTIFICATION_ID,buildNotification("Nori is speaking"));
+                }catch(Exception ignored){}
+            }
             speak(in.getStringExtra("text"));
             if(!running)handler.postDelayed(this::stopSelf,4000);
             return START_NOT_STICKY;
