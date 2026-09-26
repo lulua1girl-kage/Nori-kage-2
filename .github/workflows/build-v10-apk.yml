@@ -26,7 +26,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: npm
 
       - name: Install Capacitor Android runtime
         run: npm install --no-audit --no-fund
@@ -53,10 +52,8 @@ jobs:
           rm -rf build-v10 android/app/src/main/assets android/app/src/main/res
           mkdir -p build-v10 android/app/src/main/res/mipmap-xxxhdpi
           unzip -q "Nori-KAGE-Modern-V10-Reliability-Mentor-Voice.zip" -d build-v10
-
           cp android/v10-android-fix.css build-v10/nori-android-fix.css
           cp android/v10-android-fix.js build-v10/nori-android-fix.js
-
           python3 - <<'PY'
           from pathlib import Path
           p=Path("build-v10/index.html")
@@ -69,7 +66,6 @@ jobs:
           s=s.replace("<title>Nori — KAGE Elite Academy</title>","<title>Nori</title>",1)
           p.write_text(s,encoding="utf-8")
           PY
-
           test -f build-v10/index.html
           test -f build-v10/assets/icon.png
           cp build-v10/assets/icon.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
