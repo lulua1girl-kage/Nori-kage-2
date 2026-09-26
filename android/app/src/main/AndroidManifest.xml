@@ -7,7 +7,7 @@
 
     <application
         android:allowBackup="false"
-        android:label="Nori — KAGE"
+        android:label="Nori"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="false"
