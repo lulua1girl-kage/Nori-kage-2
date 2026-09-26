@@ -42,11 +42,18 @@ jobs:
       - name: Prepare V10 web assets
         shell: bash
         run: |
-          rm -rf build-v10 android/app/src/main/assets
+          rm -rf build-v10 android/app/src/main/assets android/app/src/main/res
           mkdir -p build-v10 android/app/src/main/assets/www
           unzip -q "Nori-KAGE-Modern-V10-Reliability-Mentor-Voice.zip" -d build-v10
           cp -a build-v10/. android/app/src/main/assets/www/
           test -f android/app/src/main/assets/www/index.html
+
+          # Use the V10-owned icon as the Android launcher icon.
+          mkdir -p android/app/src/main/res/mipmap-xxxhdpi
+          cp android/app/src/main/assets/www/assets/icon.png              android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+
+          # Keep Android's generated resource tree minimal and deterministic.
+          test -s android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
 
       - name: Build debug APK
         working-directory: android
