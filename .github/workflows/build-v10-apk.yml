@@ -1,0 +1,58 @@
+name: Build Nori KAGE V10 APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - v10-android-wrapper
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout V10 artifact and wrapper
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle 8.13
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.13"
+
+      - name: Verify untouched V10 artifact
+        shell: bash
+        run: |
+          test -f "Nori-KAGE-Modern-V10-Reliability-Mentor-Voice.zip"
+          unzip -t "Nori-KAGE-Modern-V10-Reliability-Mentor-Voice.zip"
+
+      - name: Prepare V10 web assets
+        shell: bash
+        run: |
+          rm -rf build-v10 android/app/src/main/assets
+          mkdir -p build-v10 android/app/src/main/assets/www
+          unzip -q "Nori-KAGE-Modern-V10-Reliability-Mentor-Voice.zip" -d build-v10
+          cp -a build-v10/. android/app/src/main/assets/www/
+          test -f android/app/src/main/assets/www/index.html
+
+      - name: Build debug APK
+        working-directory: android
+        run: gradle --no-daemon assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: nori-kage-v10-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
