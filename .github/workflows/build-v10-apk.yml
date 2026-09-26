@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - v10-android-wrapper
+      - main
 
 permissions:
   contents: read
