@@ -13,6 +13,13 @@ import com.getcapacitor.PluginMethod;
 public final class NoriVoicePlugin extends Plugin {
     @Override public void load() { NoriVoiceService.setPluginBridge(this); }
 
+    public static void emitFromService(String event, JSObject data) {
+        if (instance != null) instance.notifyListeners(event, data);
+    }
+
+    private static NoriVoicePlugin instance;
+    { instance = this; }
+
     @PluginMethod public void start(PluginCall call) {
         Intent i=new Intent(getContext(),NoriVoiceService.class)
             .setAction(NoriVoiceService.ACTION_START)
