@@ -1,0 +1,7 @@
+{
+  "appId": "com.nori.kage",
+  "appName": "Nori",
+  "webDir": "build-v10",
+  "android": { "allowMixedContent": false },
+  "server": { "androidScheme": "https" }
+}

@@ -1,21 +1,23 @@
-plugins {
-    id "com.android.application"
-}
+plugins { id 'com.android.application' }
 
 android {
-    namespace "com.nori.kage"
-    compileSdk 35
-
+    namespace 'com.nori.kage'
+    compileSdk 36
     defaultConfig {
-        applicationId "com.nori.kage"
+        applicationId 'com.nori.kage'
         minSdk 26
         targetSdk 35
-        versionCode 3
-        versionName "10.0.2"
+        versionCode 11
+        versionName '11.0.0'
     }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_21
         targetCompatibility JavaVersion.VERSION_21
     }
+    packaging { resources.excludes += ['/META-INF/{AL2.0,LGPL2.1}'] }
 }
+dependencies {
+    implementation project(':capacitor-android')
+}
+def capBuild = file('capacitor.build.gradle')
+if (capBuild.exists()) apply from: capBuild
