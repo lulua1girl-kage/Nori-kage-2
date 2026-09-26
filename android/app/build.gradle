@@ -18,6 +18,9 @@ android {
 }
 dependencies {
     implementation project(':capacitor-android')
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'androidx.core:core:1.17.0'
+    implementation 'androidx.annotation:annotation:1.9.1'
 }
 def capBuild = file('capacitor.build.gradle')
 if (capBuild.exists()) apply from: capBuild
