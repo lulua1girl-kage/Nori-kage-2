@@ -131,7 +131,7 @@ public final class NoriVoiceService extends Service implements RecognitionListen
 
     private void emit(String event,String text){
         if(plugin==null)return;
-        try{JSObject d=new JSObject();d.put("text",text==null?"":text);plugin.notifyListeners(event,d);}catch(Exception ignored){}
+        try{JSObject d=new JSObject();d.put("text",text==null?"":text);NoriVoicePlugin.emitFromService(event,d);}catch(Exception ignored){}
     }
 
     private void speak(String text){
