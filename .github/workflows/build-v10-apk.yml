@@ -1,4 +1,4 @@
-name: Build Nori KAGE V10 APK
+name: Build Nori V10 APK
 
 on:
   workflow_dispatch:
@@ -48,12 +48,31 @@ jobs:
           cp -a build-v10/. android/app/src/main/assets/www/
           test -f android/app/src/main/assets/www/index.html
 
+          # Android-only additive patches. The original V10 ZIP stays untouched.
+          cp android/v10-android-fix.css android/app/src/main/assets/www/nori-android-fix.css
+          cp android/v10-android-fix.js android/app/src/main/assets/www/nori-android-fix.js
+
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("android/app/src/main/assets/www/index.html")
+          s = p.read_text(encoding="utf-8")
+          if "nori-android-fix.css" not in s:
+              s = s.replace("</head>", '  <link rel="stylesheet" href="nori-android-fix.css">\n</head>', 1)
+          if "nori-android-fix.js" not in s:
+              marker = '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>'
+              s = s.replace(marker, marker + '\n<script src="nori-android-fix.js"></script>', 1)
+          s = s.replace("<title>Nori — KAGE Elite Academy</title>", "<title>Nori</title>", 1)
+          p.write_text(s, encoding="utf-8")
+          PY
+
           # Use the V10-owned icon as the Android launcher icon.
           mkdir -p android/app/src/main/res/mipmap-xxxhdpi
-          cp android/app/src/main/assets/www/assets/icon.png              android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
-
-          # Keep Android's generated resource tree minimal and deterministic.
+          cp android/app/src/main/assets/www/assets/icon.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
           test -s android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+
+          grep -q 'nori-android-fix.css' android/app/src/main/assets/www/index.html
+          grep -q 'nori-android-fix.js' android/app/src/main/assets/www/index.html
+          grep -q '<title>Nori</title>' android/app/src/main/assets/www/index.html
 
       - name: Build debug APK
         working-directory: android
@@ -62,6 +81,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: nori-kage-v10-debug-apk
+          name: nori-v10-fixed-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
