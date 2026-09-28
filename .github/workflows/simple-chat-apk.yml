@@ -1,0 +1,56 @@
+name: Build Simple Nori Chat APK
+
+on:
+  push:
+    paths:
+      - 'simple-chat/**'
+      - '.github/workflows/simple-chat-apk.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: simple-chat
+        run: npm install
+
+      - name: Build web app
+        working-directory: simple-chat
+        run: npm run build --if-present
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build APK if Android project exists
+        working-directory: simple-chat
+        run: |
+          if [ -f android/gradlew ]; then
+            chmod +x android/gradlew
+            cd android
+            ./gradlew assembleDebug
+          else
+            echo 'Android project not present in simple-chat yet.'
+            exit 1
+          fi
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: nori-simple-chat-apk
+          path: simple-chat/android/**/build/outputs/apk/**/*.apk
+          if-no-files-found: error
