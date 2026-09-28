@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Nori — Simple Chat</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: #0b0b0b; color: #f2f2f2; font-family: system-ui, sans-serif; display: flex; justify-content: center; }
+    main { width: min(760px, 100%); display: flex; flex-direction: column; min-height: 100vh; padding: 20px; }
+    h1 { font-size: 20px; margin: 0 0 14px; font-weight: 600; }
+    #chat { flex: 1; overflow-y: auto; border: 1px solid #292929; padding: 14px; border-radius: 10px; }
+    .msg { white-space: pre-wrap; line-height: 1.5; margin: 0 0 14px; }
+    .user { color: #fff; }
+    .nori { color: #cfcfcf; }
+    .label { font-size: 11px; color: #777; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 3px; }
+    form { display: flex; gap: 8px; margin-top: 12px; }
+    textarea { flex: 1; resize: none; min-height: 52px; max-height: 180px; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #111; color: #fff; outline: none; }
+    button { width: 82px; border: 1px solid #444; border-radius: 8px; background: #eee; color: #111; font-weight: 600; cursor: pointer; }
+    button:disabled { opacity: .5; cursor: wait; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Nori</h1>
+  <section id="chat" aria-live="polite"></section>
+  <form id="form">
+    <textarea id="input" placeholder="Talk to Nori..." autofocus></textarea>
+    <button id="send" type="submit">Send</button>
+  </form>
+</main>
+<script>
+  const chat = document.querySelector('#chat');
+  const form = document.querySelector('#form');
+  const input = document.querySelector('#input');
+  const send = document.querySelector('#send');
+  const messages = [];
+
+  function addMessage(role, text) {
+    const wrapper = document.createElement('div');
+    wrapper.className = `msg ${role}`;
+    const label = document.createElement('div');
+    label.className = 'label';
+    label.textContent = role === 'user' ? 'You' : 'Nori';
+    const body = document.createElement('div');
+    body.textContent = text;
+    wrapper.append(label, body);
+    chat.appendChild(wrapper);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const text = input.value.trim();
+    if (!text || send.disabled) return;
+
+    messages.push({ role: 'user', content: text });
+    addMessage('user', text);
+    input.value = '';
+    send.disabled = true;
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Request failed');
+      messages.push({ role: 'assistant', content: data.reply });
+      addMessage('nori', data.reply);
+    } catch (error) {
+      addMessage('nori', `Error: ${error.message}`);
+    } finally {
+      send.disabled = false;
+      input.focus();
+    }
+  });
+
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      form.requestSubmit();
+    }
+  });
+</script>
+</body>
+</html>
