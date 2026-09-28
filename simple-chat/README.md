@@ -15,3 +15,6 @@ The backend uses OpenAI's Responses API and keeps the Nori rules in one small co
 
 
 APK build workflow fixed on 2026-09-28.
+
+
+Build trigger.
